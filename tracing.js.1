@@ -1,0 +1,29 @@
+require("dotenv").config();
+
+const { ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { Metadata, credentials } = require("@grpc/grpc-js");
+const { NodeSDK } = require("@opentelemetry/sdk-node");
+// const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
+const { RedisInstrumentation } = require('@opentelemetry/instrumentation-redis-4');
+const { MySQL2Instrumentation } = require('@opentelemetry/instrumentation-mysql2');
+//const { OTLPTraceExporter } = require("@opentelemetry/exporter-trace-otlp-proto");
+const { OTLPTraceExporter } =  require('@opentelemetry/exporter-trace-otlp-grpc');
+// const { OTLPTraceExporter } = require("@opentelemetry/exporter-collector-grpc");
+const { diag } = require("@opentelemetry/api")
+const { DiagConsoleLogger } =  require("@opentelemetry/api")
+const { DiagLogLevel } =  require("@opentelemetry/api")
+
+
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+
+// The Trace Exporter exports the data to Honeycomb and uses
+// the environment variables for endpoint, service name, and API Key.
+const traceExporter = new OTLPTraceExporter();
+console.log(traceExporter);
+const sdk = new NodeSDK({
+    traceExporter: new ConsoleSpanExporter(),
+    instrumentations: [getNodeAutoInstrumentations()]
+});
+sdk.start()
