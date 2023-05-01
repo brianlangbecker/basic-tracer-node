@@ -11,12 +11,16 @@ const { OTLPTraceExporter } = require("@opentelemetry/exporter-trace-otlp-grpc")
 const { diag } = require("@opentelemetry/api");
 const { DiagConsoleLogger } = require("@opentelemetry/api");
 const { DiagLogLevel } = require("@opentelemetry/api");
+const { BatchSpanProcessor } = require("@opentelemetry/sdk-trace-base");
+const { EventLoopProcessor } = require("./EventLoopProcessor");
+const { trace } = require("@grpc/grpc-js/build/src/logging");
 
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 const traceExporter = new OTLPTraceExporter();
 const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
+  spanProcessor: new EventLoopProcessor(new BatchSpanProcessor(traceExporter)),
 });
 
 sdk.start();
